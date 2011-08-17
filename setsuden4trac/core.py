@@ -10,11 +10,16 @@ import sys
 class GoSetsudenComponent(Component):
     implements(ITimelineEventProvider,IAdminCommandProvider)
     def __init__(self):
-        self.reader = Reader('kansai')
+        self.reader = None
+    def set_reader(self):
+        if self.reader is None:
+            region = self.env.config.get('setsuden', 'region') or 'kansai'
+            self.reader = Reader(region)
     # ITimelineEventProvider methods
     def get_timeline_filters(self, req):
         yield ('gosetsuden', _('gosetsuden opened'))
     def get_timeline_events(self, req, start, stop, filters):
+        self.set_reader()
         result = self.reader.getusage()
         desc = "%d%%use" % result['usage']
         yield ('gosetsuden', result['datetime'], self.reader.author(), ('http://www.gosetsuden.jp/', desc))
@@ -30,6 +35,7 @@ class GoSetsudenComponent(Component):
     def get_admin_commands(self):
         yield ("setsuden usage", "", "setsuden", None, self._say_hello)
     def _say_hello(self):
+        self.set_reader()
         result = self.reader.getusage()
         desc = "%s usage %d%% @%s" % (format_time(result['datetime'], str('%H:%M')), result['usage'], self.reader.region)
         print desc

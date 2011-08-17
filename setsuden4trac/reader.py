@@ -1,6 +1,7 @@
 import urllib
 import os
 from datetime import datetime
+from trac.util.datefmt import utc
 class Reader(object):
     regions = [
         'tokyo', 
@@ -19,7 +20,7 @@ class Reader(object):
     def getusage(self):
         usage = self.usage('instant', 'latest')
         use = usage['usage']
-        time = datetime.fromtimestamp(usage['timestamp']/1000) 
+        time = datetime.fromtimestamp(usage['timestamp']/1000, utc)
         peak = self.peak('supply', 'today')['usage']
         percentage = float(use)/float(peak) * 100
         return {'usage': int(percentage), 'datetime': time}

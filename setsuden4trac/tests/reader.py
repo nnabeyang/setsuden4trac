@@ -2,6 +2,7 @@ import unittest
 from setsuden4trac.reader import *
 import os
 import re
+from trac.util.datefmt import format_time, utc
 url_re = re.compile('http://api.gosetsuden.jp/(?P<command>[a-z]+)/.+')
 class MockURLopener(object):
     commands = ['usage', 'peak']
@@ -38,8 +39,8 @@ class ReaderTests(unittest.TestCase):
         self.assertEqual({ "code": 200, "usage":38770000,"timestamp":1313226300000},
           result)
         from datetime import datetime
-        self.assertEqual("2011-08-13 18:05:00", 
-          str(datetime.fromtimestamp(result['timestamp']/1000)))
+        dtime = datetime.fromtimestamp(result['timestamp']/1000, utc)
+        self.assertEqual("18:05", format_time(dtime, str('%H:%M')))
     def test_InvalidCommand(self):
         reader = Reader('kansai')
         result = reader.nosuchcommand('instant', 'latest')
@@ -48,4 +49,4 @@ class ReaderTests(unittest.TestCase):
         reader = Reader('tokyo', opener=MockURLopener)
         result = reader.getusage()
         self.assertEqual(73, result['usage'])
-        self.assertEqual('2011-08-13 18:05:00', str(result['datetime']))
+        self.assertEqual('18:05', format_time(result['datetime'], str('%H:%M')))

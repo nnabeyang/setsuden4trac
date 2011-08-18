@@ -1,0 +1,12 @@
+.timeline dt.gosetsuden_green a {
+    background-size: 15px 15px;
+    background-image: url(../setsuden_green.gif);
+}
+.timeline dt.gosetsuden_yellow a {
+    background-size: 15px 15px;
+    background-image: url(../setsuden_yellow.gif);
+}
+.timeline dt.gosetsuden_red a {
+    background-size: 15px 15px;
+    background-image: url(../setsuden_red.gif);
+}

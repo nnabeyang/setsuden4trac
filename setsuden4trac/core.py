@@ -39,8 +39,8 @@ class GoSetsudenComponent(Component):
         result = self.reader.getusage()
         usage = result['usage']
         title = u"使用率 %d%%" % usage
-        desc = u"今日のピーク時間:%s時〜%s時" % (format_time(result['start'], str('%H'), utc),
-                                                format_time(result['end'], str('%H'), utc))
+        desc = u"今日のピーク時間:%s時〜%s時 予想使用率 %d%%" % (format_time(result['start'], str('%H'), utc),
+                                                format_time(result['end'], str('%H'), utc), result['demand'])
         add_stylesheet(req, "setsuden4trac/css/setsuden.css")
         yield (get_css_classname(usage), result['datetime'], self.reader.author(),
            ('http://www.gosetsuden.jp/', title, unicode(desc)))
@@ -59,5 +59,5 @@ class GoSetsudenComponent(Component):
         self.set_reader()
         result = self.reader.getusage()
         print u"%s 使用率 %d%% @%s" % (format_time(result['datetime'], str('%H:%M')), result['usage'], self.reader.region)
-        print u"今日のピーク時間:%s時〜%s時" % (format_time(result['start'], str('%H'), utc),
-                                                format_time(result['end'], str('%H'), utc)) 
+        print u"今日のピーク時間:%s時〜%s時 予想使用率 %d%%" % (format_time(result['start'], str('%H'), utc),
+                                                format_time(result['end'], str('%H'), utc), result['demand'])

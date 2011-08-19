@@ -1,7 +1,8 @@
+# -*- coding: utf-8 -*-
 import urllib
 import os
 from datetime import datetime
-from trac.util.datefmt import utc
+from trac.util.datefmt import utc, _tzmap
 class Reader(object):
     regions = [
         'tokyo', 
@@ -16,14 +17,19 @@ class Reader(object):
         self.region = region
         self.opener = opener()
     def author(self):
-        return 'Go setsuden@'+ self.region
+        return u'Go節電:'+ self.region
     def getusage(self):
         usage = self.usage('instant', 'latest')
         use = usage['usage']
         time = datetime.fromtimestamp(usage['timestamp']/1000, utc)
-        peak = self.peak('supply', 'today')['usage']
-        percentage = float(use)/float(peak) * 100
-        return {'usage': int(percentage), 'datetime': time}
+        supply = self.peak('supply', 'today')['usage']
+        demand_data = self.peak('demand', 'today')
+        usage = float(use)/float(supply) * 100
+        demand = float(demand_data['usage'])/float(supply) * 100
+        start = datetime.fromtimestamp(demand_data['start'], utc)
+        end = datetime.fromtimestamp(demand_data['end'], utc)
+        return {'usage': int(usage), 'datetime': time, 'demand': demand,
+                'start': start, 'end': end}
     def __getattr__(self, name):
         return lambda *args: self._exec_command(name, *args)
     def _exec_command(self, name, *args):

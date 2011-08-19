@@ -1,17 +1,18 @@
+# -*- coding: utf-8 -*-
 import unittest
 from setsuden4trac.reader import *
 import os
 import re
 from trac.util.datefmt import format_time, utc
-url_re = re.compile('http://api.gosetsuden.jp/(?P<command>[a-z]+)/.+')
+url_re = re.compile('http://api.gosetsuden.jp/(?P<command>[a-z]+)/.+?/([a-z]+)/([a-z]+)')
 class MockURLopener(object):
     commands = ['usage', 'peak']
     def __init__(self):
         self._code = None
     def open(self, url):
-        cmd = url_re.match(url).group('command')
-        if cmd in self.commands:
-            return MockFile('./setsuden4trac/tests/%s.txt' % cmd, 200)
+        m = url_re.match(url)
+        if m.group('command') in self.commands:
+            return MockFile('./setsuden4trac/tests/%s_%s_%s.txt' % m.groups(), 200)
         else:
             return MockFile('./setsuden4trac/tests/empty.txt', 404)
 class MockFile(object):
@@ -30,7 +31,7 @@ class ReaderTests(unittest.TestCase):
     def testConstructor(self):
         for region in ['tokyo', 'tohoku', 'kansai', 'kyushu', 'chubu']:
             reader = Reader(region)
-            self.assertEqual('Go setsuden@'+ region, reader.author()) 
+            self.assertEqual(u'Go節電:'+ region, reader.author())
     def testInvalidRegion(self):
         self.assertRaises(RegionError, Reader, 'nosuchregion')
     def testUsage(self):
@@ -49,4 +50,6 @@ class ReaderTests(unittest.TestCase):
         reader = Reader('tokyo', opener=MockURLopener)
         result = reader.getusage()
         self.assertEqual(73, result['usage'])
-        self.assertEqual('18:05', format_time(result['datetime'], str('%H:%M')))
+        self.assertEqual(u'18:05', format_time(result['datetime'], str('%H:%M')))
+        self.assertEqual(u'18', format_time(result['start'], str('%H'), utc))
+        self.assertEqual(u'19', format_time(result['end'], str('%H'), utc))
